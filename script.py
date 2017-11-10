@@ -6,7 +6,8 @@ from bokeh.io import curdoc
 from bokeh.layouts import row, widgetbox
 from bokeh.models import ColumnDataSource
 from bokeh.models.widgets import Slider, TextInput
-from bokeh.plotting import figure
+from bokeh.plotting import figure, output_file, show
+
 
 def get_data():
     df = pd.read_csv("lambdaboo/TYCHOII_targs.txt", sep='|')
@@ -35,6 +36,14 @@ def get_data():
 data = get_data()
 source = ColumnDataSource(data=dict(V=data.V,K=data.K))
 
+
+#temp plot
+#output_file=("test.html")
+#plot = figure()
+#plot.scatter('V','K', source=source)
+#show(plot)
+
+
 #initial setup of widgets
 text = TextInput(title="title", value='Lambda Boo Target Selection')
 slope = Slider(title="slope", value=0.0, start=-10.0, end=10.0, step=0.01)
@@ -57,25 +66,18 @@ def update_data(attrname, old, new):
     #generate new data selection range
 
 
-def plot_data(data,color,fig,ax):
-    data.K = data.K.astype(float)
-    data.V = data.V.astype(float)
-    data = data.dropna()
-    print(data.head())
+def plot_data(data,color):
     plot = figure(title="K vs V",tools="crosshair,pan,reset,save,wheel_zoom",x_label='V',y_label='K')
-    plot.scatter('V','K',color=color)
+    plot.scatter('V','K',color=color,source=source)
 
-
-
-def select_targs(data,slope,yint, width):
+#update data and generate new target list
+def select_targs(data,slope,yint,width):
     targs = (data.K < slope * data.V + yint) & (data.K > slope * data.V + yint - width)
     targs = data[targs] #selects targets for which K/V < 1 (true)
-    return targs
+    source.data = dict(V=targs.V,K=targs.K)
 
 
-fig, ax = plt.subplots()
-plot_data(data,"blue",fig,ax)
-plot_data(select_targs(data,0.9,0, 1),"red",fig,ax)
+
 
 inputs = widgetbox(text, slope, yint, width)
 
