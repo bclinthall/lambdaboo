@@ -8,6 +8,9 @@ from bokeh.models import ColumnDataSource
 from bokeh.models.widgets import Slider, TextInput
 from bokeh.plotting import figure, output_file, show
 
+default_color = "blue"
+highlight_color = "red"
+
 
 def get_data():
     df = pd.read_csv("lambdaboo/TYCHOII_targs.txt", sep='|')
@@ -25,7 +28,8 @@ def get_data():
         RA = table1['RA'][0],
         DEC = table1['DEC'][0],
         V = table1['FLUX_V'][0],
-        K = table1['FLUX_K'][0])
+        K = table1['FLUX_K'][0],
+        color = default_color)
 
     data = pd.DataFrame(data)
     print(data.T.head())
@@ -65,18 +69,25 @@ def update_data(attrname, old, new):
 
     #generate new data selection range
 
+    select_targs(data, m, b, w)
 
-def plot_data(data,color):
-    plot = figure(title="K vs V",tools="crosshair,pan,reset,save,wheel_zoom",x_label='V',y_label='K')
-    plot.scatter('V','K',color=color,source=source)
+
+
 
 #update data and generate new target list
 def select_targs(data,slope,yint,width):
-    targs = (data.K < slope * data.V + yint) & (data.K > slope * data.V + yint - width)
-    targs = data[targs] #selects targets for which K/V < 1 (true)
-    source.data = dict(V=targs.V,K=targs.K)
+    targs = (data.K < slope * data.V + yint) & (data.K > slope * data.V + yint - width) #creates boolean (T/F) for each entry
+    colors = targs.map(lambda x: highlight_color if x else default_color) #selects targets for which K/V < 1 (true)
+    source.data = dict(V=data.V,K=data.K,color=colors)
 
 
+plot = figure(title="K vs V",tools="crosshair,pan,reset,save,wheel_zoom",x_axis_label="K",y_axis_label="V")
+select_targs(data,m,b,w)
+plot.scatter('V','K',color="color",source=source)
+
+
+for w in[slope,yint,width]:
+    w.on_change('value',update_data)
 
 
 inputs = widgetbox(text, slope, yint, width)
