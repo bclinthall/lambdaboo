@@ -9,24 +9,29 @@ from bokeh.models.widgets import Slider, TextInput
 from bokeh.plotting import figure
 
 def get_data():
-    df = pd.read_csv("lambdaboo/TYCHOII_targs.txt", sep='|')
-    df = df.rename(columns = {df.columns[1]:'name'})
+    #saved_data = pd.read_csv("kvdata.csv")
 
-    data = {}
+    names_df = pd.read_csv("TYCHOII_targs.txt", sep='|')
+    names_df = names_df.rename(columns = {names_df.columns[1]:'name'})
 
-    for name in df['name'][0:100]:
+    df = pd.DataFrame(columns=['name', 'RA', 'DEC', 'V', 'K'])
+
+    Simbad.add_votable_fields('flux(V)', 'flux(K)')
+
+    for name in names_df['name'][0:10]:
+
         name = name.strip()
         print ('Fetching Data for '+ name)
-        Simbad.add_votable_fields('flux(V)', 'flux(K)')
         table1 = Simbad.query_object(name)
 
-        data[name] = dict(
-        RA = table1['RA'][0],
-        DEC = table1['DEC'][0],
-        V = table1['FLUX_V'][0],
-        K = table1['FLUX_K'][0])
+        df.append(pd.DataFrame(dict(name=name,
+            RA=table1['RA'][0],
+            DEC=table1['DEC'][0],
+            V=table1['FLUX_V'][0],
+            K=table1['FLUX_K'][0]
+        )))
 
-    data = pd.DataFrame(data)
+#    data = pd.DataFrame(data)
     print(data.T.head())
     data = data.T
     return data
