@@ -8,7 +8,9 @@ from bokeh.models import ColumnDataSource
 from bokeh.models.widgets import Slider, TextInput
 from bokeh.plotting import figure
 
+table1 = None
 def get_data():
+    global table1
     #saved_data = pd.read_csv("kvdata.csv")
 
     names_df = pd.read_csv("TYCHOII_targs.txt", sep='|')
@@ -23,7 +25,6 @@ def get_data():
         name = name.strip()
         print ('Fetching Data for '+ name)
         table1 = Simbad.query_object(name)
-
         df.append(pd.DataFrame(dict(name=name,
             RA=table1['RA'][0],
             DEC=table1['DEC'][0],

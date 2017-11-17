@@ -23,10 +23,14 @@ def get_datum_from_file(file_path):
             return datum
         except json.decoder.JSONDecodeError:
             return None
-
+table1 = None
 def get_datum_from_simbad(name, file_path):
+    global table1
     print('Fetching Data for '+ name)
     table1 = Simbad.query_object(name)
+    if table1 is None:
+        print('Simbad has no data for %s' % name)
+        return None
     datum = dict(
         RA=table1['RA'][0],
         DEC=table1['DEC'][0],
@@ -37,7 +41,6 @@ def get_datum_from_simbad(name, file_path):
     with open(file_path, 'w') as fp:
         json.dump(datum, fp)
     return datum
-
 
 def get_data(start=None, stop=None, names=None, all=False):
     data_dir_path = get_data_dir_path()
@@ -61,7 +64,8 @@ def get_data(start=None, stop=None, names=None, all=False):
             datum = get_datum_from_file(file_path)
         if datum is None:
             datum = get_datum_from_simbad(name, file_path)
-        data[name] = datum
+        if datum is not None:
+            data[name] = datum
     return data
 
 data = get_data(all=True)
