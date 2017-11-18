@@ -30,13 +30,19 @@ def get_datum_from_simbad(name, file_path):
     table1 = Simbad.query_object(name)
     if table1 is None:
         print('Simbad has no data for %s' % name)
-        return None
-    datum = dict(
-        RA=table1['RA'][0],
-        DEC=table1['DEC'][0],
-        V=float(table1['FLUX_V'][0]),
-        K=float(table1['FLUX_K'][0])
-    )
+        datum = dict(
+            RA='',
+            DEC='',
+            V=float('nan'),
+            K=float('nan')
+        )
+    else:
+        datum = dict(
+            RA=table1['RA'][0],
+            DEC=table1['DEC'][0],
+            V=float(table1['FLUX_V'][0]),
+            K=float(table1['FLUX_K'][0])
+        )
     print(datum)
     with open(file_path, 'w') as fp:
         json.dump(datum, fp)
