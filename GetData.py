@@ -75,3 +75,7 @@ def get_data(start=None, stop=None, names=None, all=False):
     return data
 
 data = get_data(all=True)
+
+df = pd.DataFrame(data)
+df = df.T
+df.to_csv('all_data.csv')
