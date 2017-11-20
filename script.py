@@ -1,42 +1,71 @@
 import pandas as pd
 from astroquery.simbad import Simbad
-import matplotlib.pyplot as plt
 
 from bokeh.io import curdoc
 from bokeh.layouts import row, widgetbox
+from bokeh.models import HoverTool, ColumnDataSource
+from bokeh.models.widgets import Slider
+from bokeh.models.glyphs import Patch
+from bokeh.plotting import figure, show
 from bokeh.models import ColumnDataSource
-from bokeh.models.widgets import Slider, TextInput
-from bokeh.plotting import figure
 
-table1 = None
-def get_data():
-    global table1
-    #saved_data = pd.read_csv("kvdata.csv")
+x_range = [-1,11]
+y_range = [4.5,12]
+hover = HoverTool(tooltips=[
+    ('k', '@x'),
+    ('v', '@y'),
+    ('name', '@name')
+])
+def get_patch_y(x):
+    return slope.value * x + yint.value
 
-    names_df = pd.read_csv("TYCHOII_targs.txt", sep='|')
-    names_df = names_df.rename(columns = {names_df.columns[1]:'name'})
+def add_patch(figure):
 
-    df = pd.DataFrame(columns=['name', 'RA', 'DEC', 'V', 'K'])
+    xpts = [x_range[0], width.value, width.value, x_range[0]]
+    ypts = [get_patch_y(x) for x in xpts]
+    source = ColumnDataSource(dict(x=xpts, y=ypts))
+    glyph = Patch(x='x', y='y')
+    figure.add_glyph(source, glyph)
 
-    Simbad.add_votable_fields('flux(V)', 'flux(K)')
+plot_data = data.sample(frac=percent_of_data.value)
+targs = (plot_data.K < m * plot_data.V + y) & (plot_data.K > m * plot_data.V + y - w)
+plot_data['color'] = targs.map(lambda x: 'red' if x else 'blue')
+source = ColumnDataSource(data=dict(x=plot_data.K, y=plot_data.V, color=plot_data.color, name=plot_data.index))
+p = figure(plot_height=600, plot_width=800, x_range=x_range,y_range=y_range, tools='pan,box_zoom,reset')
+#add_patch(p)
 
-    for name in names_df['name'][0:10]:
+p.circle('x', 'y', source=source, color='color')
+p.add_tools(hover)
 
-        name = name.strip()
-        print ('Fetching Data for '+ name)
-        table1 = Simbad.query_object(name)
-        df.append(pd.DataFrame(dict(name=name,
-            RA=table1['RA'][0],
-            DEC=table1['DEC'][0],
-            V=table1['FLUX_V'][0],
-            K=table1['FLUX_K'][0]
-        )))
 
-#    data = pd.DataFrame(data)
-    print(data.T.head())
-    data = data.T
-    return data
+def create_figure():
+    m = slope.value
+    y = yint.value
+    w = width.value
+    targs = (plot_data.K < m * plot_data.V + y) & (plot_data.K > m * plot_data.V + y - w)
+    plot_data['color'] = targs.map(lambda x: 'red' if x else 'blue')
+    return p
 
+
+def update(attrname, old, new):
+    layout.children[1] = create_figure()
+
+data = pd.read_csv("all_tychoii_data.csv")
+data = data.dropna()
+data = data.set_index('name')
+slope = Slider(title="slope", value=0.0, start=-10.0, end=10.0, step=0.01)
+yint = Slider(title="yint", value=0.0, start=-10.0, end=10.0, step=0.1)
+width = Slider(title="width",value=1.0,start=0.0, end=10.0,step=0.01)
+percent_of_data = Slider(title='sample %', value=0.01, start=0, end=1.0, step=0.01)
+widgets = [slope, yint, width, percent_of_data]
+for widget in widgets:
+    widget.on_change('value', update)
+controls = widgetbox(widgets, width=200)
+layout = row(controls, create_figure())
+curdoc().add_root(layout)
+
+show(create_figure())
+'''
 #Get data and put into dictionary via bokeh
 data = get_data()
 source = ColumnDataSource(data=dict(V=data.V,K=data.K))
@@ -73,10 +102,6 @@ def plot_data(data,color,fig,ax):
 
 
 
-def select_targs(data,slope,yint, width):
-    targs = (data.K < slope * data.V + yint) & (data.K > slope * data.V + yint - width)
-    targs = data[targs] #selects targets for which K/V < 1 (true)
-    return targs
 
 
 fig, ax = plt.subplots()
@@ -87,3 +112,4 @@ inputs = widgetbox(text, slope, yint, width)
 
 curdoc().add_root(row(inputs, plot, width=800))
 curdoc().title = "Sliders"
+'''
