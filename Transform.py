@@ -31,10 +31,10 @@ dst = np.array([
 
 ])
 src = np.array([
-    [0.0 ,  6.0],
-    [0.0,   9.88],
+    [-10.5 ,-0.62],
+    [0.0, 9.88],
     [10.5, 10.5],
-    [7.0,   6.62],
+    [0.0,0.0],
 ])
 
 tform = tf.ProjectiveTransform()
@@ -44,15 +44,14 @@ mat = tform.params
 
 
 srcpts = np.array([
-    [0.0 ,  6.0, 1],
-    [0.0,   9.88, 1],
+    [-10.5 ,-0.62, 1],
+    [0.0, 9.88, 1],
     [10.5, 10.5, 1],
-    [7.0,   6.62, 1],
+    [0.0,0.0, 1],
 ])
 
 
-
-print('Source pts translated to ', np.round(mat.dot(srcpts.transpose()), 2))
+np.round(mat.dot(srcpts.transpose()), 2)
 
 valT = values.transpose()
 ones = np.ones((1,valT.shape[1]))
