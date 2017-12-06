@@ -52,13 +52,21 @@ b = 0.0
 w = 1.0
 delb = (w / math.cos(math.atan(m)))
 perc = 0.01
+
+def resample():
+    update_perc(None, None, None)
+
+def update_perc(attrname, old, new):
+    global plot_data
+    perc = percent_of_data.value
+    plot_data = data.sample(frac=perc)
+    update(attrname, old, new)
+
 def update(attrname, old, new):
-    global m, b, delb
+    global m, b, delb, plot_data
     m = slope.value
     b = yint.value
     delb = (width.value / math.cos(math.atan(m)))
-    perc = percent_of_data.value
-    plot_data = data.sample(frac=perc)
     targs = (plot_data.V < m * plot_data.K + b + delb) & (plot_data.V > m * plot_data.K + b)
     plot_data['color'] = targs.map(lambda x: 'red' if x else 'blue')
     source.data = plot_data.reset_index().to_dict('list')
@@ -113,12 +121,14 @@ yint = Slider(title="yint", value=b, start=-10.0, end=10.0, step=0.1)
 width = Slider(title="width",value=w,start=0.0, end=10.0,step=0.01)
 percent_of_data = Slider(title='sample %', value=perc, start=0.001, end=1.0, step=0.001)
 save_btn = Button(label="save targs")
-widgets = [slope, yint, width, percent_of_data]
+resample_btn = Button(label='resample')
+widgets = [slope, yint, width]
 for widget in widgets:
     widget.on_change('value', update)
 save_btn.on_click(save)
-
-controls = widgetbox(widgets + [save_btn], width=200)
+percent_of_data.on_change('value', update_perc)
+resample_btn.on_click(resample)
+controls = widgetbox(widgets + [save_btn, percent_of_data, resample_btn], width=200)
 
 
 layout = row(controls, create_figure())
