@@ -43,7 +43,8 @@ def create_figure():
         y_axis_label=y_label,
         tools='pan,box_zoom,reset')
     p.add_glyph(patch_source, patch_glyph)
-    p.circle(x=x_label, y=y_label, color='color', source=source)
+    #p.circle(x=x_label, y=y_label, color='color', source=source)
+    p.circle(x=x_label, y=y_label, source=source)
     p.add_tools(hover)
     return p
 
@@ -67,9 +68,9 @@ def update(attrname, old, new):
     m = slope.value
     b = yint.value
     delb = (width.value / math.cos(math.atan(m)))
-    targs = (plot_data.V < m * plot_data.K + b + delb) & (plot_data.V > m * plot_data.K + b)
-    plot_data['color'] = targs.map(lambda x: 'red' if x else 'blue')
-    source.data = plot_data.reset_index().to_dict('list')
+    #targs = (plot_data.V < m * plot_data.K + b + delb) & (plot_data.V > m * plot_data.K + b)
+    #plot_data['color'] = targs.map(lambda x: 'red' if x else 'blue')
+    #source.data = plot_data.reset_index().to_dict('list')
 
     patch_xs = [x_range[0], x_range[1], x_range[1], x_range[0]]
     patch_ys = [m * x + b for x in patch_xs]
@@ -104,8 +105,8 @@ data = pd.read_csv("all_tychoii_data.csv")
 data = data.dropna()
 data = data.set_index('name')
 plot_data = data.sample(frac=perc)
-targs = (plot_data.V < m * plot_data.K + b + delb) & (plot_data.V > m * plot_data.K + b)
-plot_data['color'] = targs.map(lambda x: 'red' if x else 'blue')
+#targs = (plot_data.V < m * plot_data.K + b + delb) & (plot_data.V > m * plot_data.K + b)
+#plot_data['color'] = targs.map(lambda x: 'red' if x else 'blue')
 source = ColumnDataSource(plot_data.reset_index().to_dict('list'))
 
 

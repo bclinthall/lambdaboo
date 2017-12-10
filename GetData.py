@@ -23,6 +23,7 @@ def get_datum_from_file(file_path):
             return datum
         except json.decoder.JSONDecodeError:
             return None
+
 table1 = None
 def get_datum_from_simbad(name, file_path):
     global table1
@@ -30,12 +31,7 @@ def get_datum_from_simbad(name, file_path):
     table1 = Simbad.query_object(name)
     if table1 is None:
         print('Simbad has no data for %s' % name)
-        datum = dict(
-            RA='',
-            DEC='',
-            V=float('nan'),
-            K=float('nan')
-        )
+        datum = dict(RA='',DEC='',V=float('nan'), K=float('nan'))
     else:
         datum = dict(
             RA=table1['RA'][0],
