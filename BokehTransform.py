@@ -65,9 +65,9 @@ def draw(attr, old, new):
 
 # Widgets
 
-rotation_ti = TextInput(title="rotation", value='-0.014')
+rotation_ti = TextInput(title="rotation -0.014", value='-0.014')
 rotation_ti.on_change('value', draw)
-shear_ti = TextInput(title='shear', value='1.2')
+shear_ti = TextInput(title='shear 1.2', value='1.2')
 shear_ti.on_change('value', draw)
 
 
@@ -103,7 +103,7 @@ def get_2dhist_coldatsrc_dict(sample, fig=None):
         fig.x_range.end = xedges[-1]
         fig.y_range.start = yedges[0]
         fig.y_range.end = yedges[-1]
-    return dict(image=[H], x=[xedges[0]], y=[yedges[0]], dw=[xedges[-1]-xedges[0]], dh=[yedges[-1]-yedges[0]])
+    return dict(image=[H], x=[yedges[0]], y=[xedges[0]], dw=[yedges[-1]-yedges[0]], dh=[xedges[-1]-xedges[0]])
 
 
 orig_hist2d = ColumnDataSource(data=get_2dhist_coldatsrc_dict(sample))
