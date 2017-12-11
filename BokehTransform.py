@@ -81,7 +81,7 @@ y_label = data.columns[1]
 
 
 # Initial transform
-sample = data.sample(frac=0.1)
+sample = data.sample(frac=1)
 sample = sample.values
 sample = sample.transpose()
 ones = np.ones((1,sample.shape[1]))
@@ -95,15 +95,18 @@ source = ColumnDataSource(data={x_label: warped[0], y_label: warped[1]})
 
 def get_2dhist_coldatsrc_dict(sample, fig=None):
     bins = [np.linspace(sample[1].min(), sample[1].max(), 200), np.linspace(sample[0].min(), sample[0].max(), 200)]
-    H, xedges, yedges = np.histogram2d(sample[1], sample[0], bins=bins)
+    H, yedges, xedges = np.histogram2d(sample[1], sample[0], bins=bins)
     H = np.log10(H + 1)
 
     if fig is not None:
+        #x_range=(src.data['x'][0], src.data['x'][0]+src.data['dw'][0]),
+        #y_range=(src.data['y'][0], src.data['y'][0]+src.data['dh'][0]),
+
         fig.x_range.start = xedges[0]
         fig.x_range.end = xedges[-1]
         fig.y_range.start = yedges[0]
         fig.y_range.end = yedges[-1]
-    return dict(image=[H], x=[yedges[0]], y=[xedges[0]], dw=[yedges[-1]-yedges[0]], dh=[xedges[-1]-xedges[0]])
+    return dict(image=[H], x=[xedges[0]], y=[yedges[0]], dw=[xedges[-1]-xedges[0]], dh=[yedges[-1]-yedges[0]])
 
 
 orig_hist2d = ColumnDataSource(data=get_2dhist_coldatsrc_dict(sample))
