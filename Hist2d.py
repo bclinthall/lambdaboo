@@ -42,3 +42,4 @@ p.image(image='image', x='x', y='y', dw='dw', dh='dw', source=hist2dsource, pale
 show(p)
 
 
+

@@ -61,6 +61,7 @@ def update_perc(attrname, old, new):
     global plot_data
     perc = percent_of_data.value
     plot_data = data.sample(frac=perc)
+    source.data = plot_data.reset_index().to_dict('list')
     update(attrname, old, new)
 
 def update(attrname, old, new):
@@ -70,7 +71,6 @@ def update(attrname, old, new):
     delb = (width.value / math.cos(math.atan(m)))
     #targs = (plot_data.V < m * plot_data.K + b + delb) & (plot_data.V > m * plot_data.K + b)
     #plot_data['color'] = targs.map(lambda x: 'red' if x else 'blue')
-    #source.data = plot_data.reset_index().to_dict('list')
 
     patch_xs = [x_range[0], x_range[1], x_range[1], x_range[0]]
     patch_ys = [m * x + b for x in patch_xs]
